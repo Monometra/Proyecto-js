@@ -2,13 +2,14 @@
 // NAVBAR - Menú de Usuario (CORREGIDO)
 // ========================================
 
+import { escapeHtml } from './utils.js';
+
 /**
  * Detecta si estamos en un subdirectorio (como /html/)
  * @returns {string} Prefijo de ruta ('/' o '../')
  */
 function getPathPrefix() {
   const path = window.location.pathname;
-  // Si estamos en /html/ o cualquier subdirectorio
   if (path.includes('/html/')) {
     return '../';
   }
@@ -26,7 +27,6 @@ function checkAuth() {
     
     const user = JSON.parse(userStr);
     
-    // Validar que tenga los campos requeridos
     if (!user || !user.id || !user.email || !user.nombre) {
       console.warn('Usuario inválido en localStorage');
       localStorage.removeItem('hotel_current_user');
@@ -55,7 +55,6 @@ function getFirstName(fullName) {
  * Cierra la sesión del usuario
  */
 function performLogout() {
-  // Limpiar todas las claves relacionadas con autenticación
   localStorage.removeItem('hotel_current_user');
   localStorage.removeItem('currentUser');
   localStorage.removeItem('isLoggedIn');
@@ -66,7 +65,6 @@ function performLogout() {
   
   console.log('Sesión cerrada correctamente');
   
-  // Redirigir al inicio con ruta correcta
   const prefix = getPathPrefix();
   window.location.href = prefix + 'index.html';
 }
@@ -85,8 +83,7 @@ function updateUserMenu() {
   const prefix = getPathPrefix();
   
   if (user) {
-    // Usuario autenticado - mostrar menú dropdown
-    const firstName = getFirstName(user.nombre);
+    const firstName = escapeHtml(getFirstName(user.nombre));
     
     userMenuItem.innerHTML = `
       <div class="nav-item dropdown">
@@ -117,7 +114,6 @@ function updateUserMenu() {
       </div>
     `;
     
-    // Agregar event listener al botón de cerrar sesión
     const logoutBtn = document.getElementById('navLogoutBtn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', (e) => {
@@ -128,7 +124,6 @@ function updateUserMenu() {
       });
     }
   } else {
-    // Usuario no autenticado - mostrar botón de login con ruta correcta
     userMenuItem.innerHTML = `
       <a class="nav-link" href="${prefix}login.html">
         <i class="bi bi-person-circle"></i> Ingresar
@@ -141,28 +136,22 @@ function updateUserMenu() {
 // INICIALIZACIÓN
 // ========================================
 
-// Ejecutar cuando el DOM esté listo
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', updateUserMenu);
 } else {
-  // Si el DOM ya está listo, ejecutar inmediatamente
   updateUserMenu();
 }
 
-// Actualizar cuando la página se muestre (navegación con botón atrás)
 window.addEventListener('pageshow', (event) => {
-  // Si la página viene del cache (bfcache), actualizar el menú
   if (event.persisted) {
     updateUserMenu();
   }
 });
 
-// Actualizar si cambia el estado de login en otra pestaña
 window.addEventListener('storage', (e) => {
   if (e.key === 'hotel_current_user' || e.key === 'isLoggedIn') {
     updateUserMenu();
   }
 });
 
-// Debug: mostrar ruta detectada
 console.log('Navbar User JS cargado - Prefijo de ruta:', getPathPrefix());

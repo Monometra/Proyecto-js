@@ -3,6 +3,8 @@
 // Guardar como: js/navbar.js
 // ========================================
 
+import { escapeHtml } from './utils.js';
+
 // Verificar si el usuario está autenticado
 function checkAuth() {
   const user = JSON.parse(localStorage.getItem('currentUser'));
@@ -16,7 +18,7 @@ function checkAuth() {
     userMenuItem.innerHTML = `
       <div class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-          <i class="bi bi-person-circle"></i> ${user.nombre}
+          <i class="bi bi-person-circle"></i> ${escapeHtml(user.nombre)}
         </a>
         <ul class="dropdown-menu dropdown-menu-end">
           <li>
@@ -86,10 +88,8 @@ function setActiveNavLink() {
     const href = link.getAttribute('href');
     if (!href) return;
     
-    // Extraer solo el nombre del archivo
     const linkPage = href.split('/').pop().split('#')[0];
     
-    // Comparar con la página actual
     if (linkPage === currentPage || 
         (currentPage === '' && linkPage === 'index.html') ||
         (currentPage === 'index.html' && linkPage === 'index.html')) {
@@ -97,7 +97,6 @@ function setActiveNavLink() {
     }
   });
   
-  // Marcar activo en dropdown items de mis-reservas.html
   const dropdownItems = document.querySelectorAll('.dropdown-menu .dropdown-item');
   dropdownItems.forEach(item => {
     item.classList.remove('active');
@@ -116,11 +115,9 @@ function initNavbarScroll() {
   const nav = document.getElementById('mainNav');
   if (!nav) return;
   
-  // Determinar si la página tiene hero carousel
   const hasHeroCarousel = document.getElementById('heroCarousel') !== null;
   
   if (hasHeroCarousel) {
-    // En index.html con carousel - navbar transparente al inicio
     window.addEventListener('scroll', function() {
       if (window.scrollY > 100) {
         nav.classList.add('navbar-scrolled');
@@ -129,7 +126,6 @@ function initNavbarScroll() {
       }
     });
   } else {
-    // En otras páginas - navbar siempre con fondo oscuro
     nav.classList.add('navbar-scrolled');
   }
 }
@@ -140,20 +136,18 @@ function initSmoothScroll() {
     anchor.addEventListener('click', function(e) {
       const href = this.getAttribute('href');
       
-      // Ignorar enlaces vacíos, solo "#", o dropdown toggles
       if (href === '#' || href === '' || this.classList.contains('dropdown-toggle')) return;
       
       e.preventDefault();
       const target = document.querySelector(href);
       
       if (target) {
-        const offsetTop = target.offsetTop - 70; // 70px para compensar el navbar fixed
+        const offsetTop = target.offsetTop - 70;
         window.scrollTo({
           top: offsetTop,
           behavior: 'smooth'
         });
         
-        // Cerrar el navbar mobile si está abierto
         const navbarCollapse = document.getElementById('navbarNav');
         if (navbarCollapse && navbarCollapse.classList.contains('show')) {
           const bsCollapse = new bootstrap.Collapse(navbarCollapse);
@@ -164,12 +158,11 @@ function initSmoothScroll() {
   });
 }
 
-// Inicializar menú móvil (CORREGIDO - con validaciones)
+// Inicializar menú móvil
 function initMobileMenu() {
   const toggle = document.getElementById('menuToggle');
   const navMenu = document.getElementById('navMenu');
   
-  // Solo agregar listener si ambos elementos existen
   if (toggle && navMenu) {
     toggle.addEventListener('click', () => {
       navMenu.classList.toggle('active');
@@ -183,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
   setActiveNavLink();
   initNavbarScroll();
   initSmoothScroll();
-  initMobileMenu(); // Ahora con validación
+  initMobileMenu();
 });
 
 // Exportar funciones para uso en otros scripts

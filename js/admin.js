@@ -19,6 +19,7 @@ import {
   formatPrice,
   formatDate
 } from './storage.js';
+import { escapeHtml } from './utils.js';
 
 // Verificar que sea admin
 if (!isAdmin()) {
@@ -27,7 +28,8 @@ if (!isAdmin()) {
 }
 
 const user = getCurrentUser();
-document.getElementById('adminName').textContent = user.nombre;
+const adminNameEl = document.getElementById('adminName');
+if (adminNameEl) adminNameEl.textContent = user.nombre;
 
 // Variables globales
 let currentRoomId = null;
@@ -85,12 +87,12 @@ function loadRooms() {
   rooms.forEach(room => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${room.id}</td>
-      <td>${room.nombre}</td>
-      <td>${room.personas}</td>
-      <td>${room.camas}</td>
-      <td>${formatPrice(room.precioNoche || room.precio)}</td>
-      <td>${room.servicios.slice(0, 3).join(', ')}${room.servicios.length > 3 ? '...' : ''}</td>
+      <td>${escapeHtml(room.id)}</td>
+      <td>${escapeHtml(room.nombre)}</td>
+      <td>${escapeHtml(room.personas)}</td>
+      <td>${escapeHtml(room.camas)}</td>
+      <td>${escapeHtml(formatPrice(room.precioNoche || room.precio))}</td>
+      <td>${escapeHtml(room.servicios.slice(0, 3).join(', '))}${room.servicios.length > 3 ? '...' : ''}</td>
       <td class="table-actions">
         <button class="btn btn-sm btn-outline-primary" onclick="window.openRoomModal(${room.id})">
           <i class="bi bi-pencil"></i>
@@ -139,16 +141,16 @@ function filterBookings() {
     const user = getUserById(booking.userId);
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>${booking.id}</td>
-      <td>${room ? room.nombre : 'N/A'}</td>
-      <td>${user ? user.nombre : (booking.nombreCliente || 'N/A')}</td>
-      <td>${formatDate(booking.fechaInicio || booking.checkIn)}</td>
-      <td>${formatDate(booking.fechaFin || booking.checkOut)}</td>
-      <td>${booking.personas}</td>
-      <td>${formatPrice(booking.total)}</td>
+      <td>${escapeHtml(booking.id)}</td>
+      <td>${escapeHtml(room ? room.nombre : 'N/A')}</td>
+      <td>${escapeHtml(user ? user.nombre : (booking.nombreCliente || 'N/A'))}</td>
+      <td>${escapeHtml(formatDate(booking.fechaInicio || booking.checkIn))}</td>
+      <td>${escapeHtml(formatDate(booking.fechaFin || booking.checkOut))}</td>
+      <td>${escapeHtml(booking.personas)}</td>
+      <td>${escapeHtml(formatPrice(booking.total))}</td>
       <td>
         <span class="badge bg-${booking.estado === 'confirmada' ? 'success' : 'danger'}">
-          ${booking.estado.charAt(0).toUpperCase() + booking.estado.slice(1)}
+          ${escapeHtml(booking.estado.charAt(0).toUpperCase() + booking.estado.slice(1))}
         </span>
       </td>
       <td class="table-actions">
@@ -194,7 +196,7 @@ window.openRoomModal = function(id = null) {
         const div = document.createElement('div');
         div.className = 'input-group mb-2';
         div.innerHTML = `
-          <input type="text" class="form-control service-input" value="${servicio}" placeholder="Ej: WiFi">
+          <input type="text" class="form-control service-input" value="${escapeHtml(servicio)}" placeholder="Ej: WiFi">
           <button type="button" class="btn btn-outline-danger" onclick="window.removeServiceInput(this)">
             <i class="bi bi-dash"></i>
           </button>
@@ -263,7 +265,7 @@ document.getElementById('roomForm').addEventListener('submit', (e) => {
     camas, 
     personas, 
     precioNoche, 
-    precio: precioNoche, // Mantener ambas propiedades por compatibilidad
+    precio: precioNoche,
     servicios 
   };
   
