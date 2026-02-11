@@ -2,9 +2,6 @@
 // SCRIPT: MIS RESERVAS (Solo Visualización)
 // ========================================
 
-// =======================
-// IMPORTAR DEPENDENCIAS
-// =======================
 import {
   isAuthenticated,
   getCurrentUser,
@@ -13,17 +10,12 @@ import {
   formatPrice,
   formatDate
 } from './storage.js';
+import { escapeHtml } from './utils.js';
 
-// =======================
-// VARIABLES GLOBALES
-// =======================
 let allBookings = [];
-let currentFilter = 'all'; // para filtros opcionales
+let currentFilter = 'all';
 let detailsModal = null;
 
-// =======================
-// INICIALIZACIÓN
-// =======================
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
@@ -34,9 +26,6 @@ function init() {
   loadBookings();
 }
 
-// =======================
-// VERIFICACIÓN DE SESIÓN
-// =======================
 function verifyAuthentication() {
   if (!isAuthenticated()) {
     alert('Debes iniciar sesión para ver tus reservas');
@@ -51,9 +40,6 @@ function verifyAuthentication() {
   }
 }
 
-// =======================
-// PERFIL DEL USUARIO
-// =======================
 function setupUserProfile() {
   const user = getCurrentUser();
   if (!user) return;
@@ -67,9 +53,6 @@ function setupUserProfile() {
   if (profileEmailEl) profileEmailEl.textContent = user.email;
 }
 
-// =======================
-// CONFIGURAR MODAL DETALLES
-// =======================
 function setupModal() {
   const detailsModalEl = document.getElementById('detailsModal');
   if (detailsModalEl) {
@@ -77,9 +60,6 @@ function setupModal() {
   }
 }
 
-// =======================
-// CARGAR RESERVAS
-// =======================
 function loadBookings() {
   try {
     const user = getCurrentUser();
@@ -93,9 +73,6 @@ function loadBookings() {
   }
 }
 
-// =======================
-// ESTADÍSTICAS
-// =======================
 function updateStats() {
   const active = allBookings.filter(b => b.estado === 'confirmada').length;
   const totalSpent = allBookings
@@ -112,9 +89,6 @@ function setText(id, value) {
   if (el) el.textContent = value;
 }
 
-// =======================
-// RENDERIZAR LISTA DE RESERVAS
-// =======================
 function renderBookings() {
   const container = document.getElementById('bookingsContainer');
   if (!container) return;
@@ -130,9 +104,6 @@ function renderBookings() {
   attachDetailListeners();
 }
 
-// =======================
-// FILTRADO DE RESERVAS
-// =======================
 function getFilteredBookings() {
   switch (currentFilter) {
     case 'active':
@@ -144,16 +115,13 @@ function getFilteredBookings() {
   }
 }
 
-// =======================
-// TARJETA DE RESERVA
-// =======================
 function createBookingCard(booking) {
   const room = getRoomById(booking.roomId);
   if (!room) {
     return `
       <div class="booking-card">
         <div class="booking-header bg-danger text-white">
-          Error: Habitación no encontrada (ID: ${booking.roomId})
+          Error: Habitación no encontrada (ID: ${escapeHtml(booking.roomId)})
         </div>
       </div>`;
   }
@@ -165,8 +133,8 @@ function createBookingCard(booking) {
     <div class="booking-card">
       <div class="booking-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
-          <h5 class="mb-1">${room.nombre}</h5>
-          <small>Reserva #${booking.id}</small>
+          <h5 class="mb-1">${escapeHtml(room.nombre)}</h5>
+          <small>Reserva #${escapeHtml(booking.id)}</small>
         </div>
         <span class="booking-status status-${booking.estado}">
           <i class="bi bi-${isActive ? 'check-circle' : 'x-circle'}"></i>
@@ -176,8 +144,8 @@ function createBookingCard(booking) {
 
       <div class="booking-body row">
         <div class="col-md-4 mb-3 mb-md-0">
-          <img src="assets/img/rooms/${room.imagen}" 
-               alt="${room.nombre}" 
+          <img src="assets/img/rooms/${escapeHtml(room.imagen)}" 
+               alt="${escapeHtml(room.nombre)}" 
                class="booking-image"
                onerror="this.src='https://picsum.photos/400/300?random=${booking.id}'">
         </div>
@@ -193,19 +161,19 @@ function renderBookingInfo(booking, room, isActive, isPast) {
   return `
     <div class="info-row">
       <i class="bi bi-calendar-check text-gold"></i> Check-in: 
-      <strong>${formatDate(booking.fechaInicio)}</strong>
+      <strong>${escapeHtml(formatDate(booking.fechaInicio))}</strong>
     </div>
     <div class="info-row">
       <i class="bi bi-calendar-x text-gold"></i> Check-out: 
-      <strong>${formatDate(booking.fechaFin)}</strong>
+      <strong>${escapeHtml(formatDate(booking.fechaFin))}</strong>
     </div>
     <div class="info-row">
       <i class="bi bi-people text-gold"></i> Personas: 
-      <strong>${booking.personas}</strong>
+      <strong>${escapeHtml(booking.personas)}</strong>
     </div>
     <div class="info-row">
       <i class="bi bi-currency-dollar text-gold"></i> Total: 
-      <strong class="text-gold">${formatPrice(booking.total)}</strong>
+      <strong class="text-gold">${escapeHtml(formatPrice(booking.total))}</strong>
     </div>
 
     <div class="mt-3 d-flex gap-2 flex-wrap">
@@ -217,18 +185,12 @@ function renderBookingInfo(booking, room, isActive, isPast) {
     </div>`;
 }
 
-// =======================
-// EVENTOS DE DETALLES
-// =======================
 function attachDetailListeners() {
   document.querySelectorAll('.btn-view-details').forEach(btn => {
     btn.addEventListener('click', () => showDetails(parseInt(btn.dataset.bookingId)));
   });
 }
 
-// =======================
-// DETALLES DE RESERVA (SOLO LECTURA)
-// =======================
 function showDetails(bookingId) {
   const booking = allBookings.find(b => b.id === bookingId);
   if (!booking) return showAlert('Reserva no encontrada', 'danger');
@@ -251,15 +213,15 @@ function renderBookingDetails(booking, room, nights) {
   return `
     <div class="row">
       <div class="col-md-6">
-        <img src="assets/img/rooms/${room.imagen}" 
+        <img src="assets/img/rooms/${escapeHtml(room.imagen)}" 
              class="img-fluid rounded mb-3" 
-             alt="${room.nombre}"
+             alt="${escapeHtml(room.nombre)}"
              onerror="this.src='https://picsum.photos/500/400?random=${booking.id}'">
       </div>
 
       <div class="col-md-6">
-        <h4 class="mb-3">${room.nombre}</h4>
-        <p class="text-muted">${room.descripcion}</p>
+        <h4 class="mb-3">${escapeHtml(room.nombre)}</h4>
+        <p class="text-muted">${escapeHtml(room.descripcion)}</p>
 
         ${renderBookingDetailsInfo(booking, nights)}
         ${renderServices(room.servicios)}
@@ -273,19 +235,16 @@ function renderBookingDetails(booking, room, nights) {
     </div>`;
 }
 
-// =======================
-// SUBSECCIONES DETALLES
-// =======================
 function renderBookingDetailsInfo(booking, nights) {
   return `
     <h6 class="mt-4 mb-3 text-gold"><i class="bi bi-info-circle"></i> Información de la Reserva</h6>
     <ul class="list-unstyled">
-      <li><i class="bi bi-hash text-gold"></i> <strong>ID:</strong> ${booking.id}</li>
-      <li><i class="bi bi-calendar-check text-gold"></i> <strong>Check-in:</strong> ${formatDate(booking.fechaInicio)}</li>
-      <li><i class="bi bi-calendar-x text-gold"></i> <strong>Check-out:</strong> ${formatDate(booking.fechaFin)}</li>
-      <li><i class="bi bi-moon-stars text-gold"></i> <strong>Noches:</strong> ${nights}</li>
-      <li><i class="bi bi-people text-gold"></i> <strong>Personas:</strong> ${booking.personas}</li>
-      <li><i class="bi bi-clock text-gold"></i> <strong>Fecha de reserva:</strong> ${formatDate(booking.fechaReserva)}</li>
+      <li><i class="bi bi-hash text-gold"></i> <strong>ID:</strong> ${escapeHtml(booking.id)}</li>
+      <li><i class="bi bi-calendar-check text-gold"></i> <strong>Check-in:</strong> ${escapeHtml(formatDate(booking.fechaInicio))}</li>
+      <li><i class="bi bi-calendar-x text-gold"></i> <strong>Check-out:</strong> ${escapeHtml(formatDate(booking.fechaFin))}</li>
+      <li><i class="bi bi-moon-stars text-gold"></i> <strong>Noches:</strong> ${escapeHtml(nights)}</li>
+      <li><i class="bi bi-people text-gold"></i> <strong>Personas:</strong> ${escapeHtml(booking.personas)}</li>
+      <li><i class="bi bi-clock text-gold"></i> <strong>Fecha de reserva:</strong> ${escapeHtml(formatDate(booking.fechaReserva))}</li>
       <li><i class="bi bi-info-circle text-gold"></i> <strong>Estado:</strong> 
         <span class="booking-status status-${booking.estado}">
           ${booking.estado === 'confirmada' ? 'Confirmada' : 'Cancelada'}
@@ -298,7 +257,7 @@ function renderServices(services = []) {
   return `
     <h6 class="mt-4 mb-3 text-gold"><i class="bi bi-star"></i> Servicios Incluidos</h6>
     <div class="mb-3">
-      ${services.map(s => `<span class="service-badge"><i class="bi bi-check2"></i> ${s}</span>`).join('')}
+      ${services.map(s => `<span class="service-badge"><i class="bi bi-check2"></i> ${escapeHtml(s)}</span>`).join('')}
     </div>`;
 }
 
@@ -307,38 +266,32 @@ function renderCostDetails(room, nights, total) {
     <div class="alert alert-info">
       <h6 class="alert-heading"><i class="bi bi-currency-dollar"></i> Detalles del Costo</h6>
       <div class="d-flex justify-content-between mb-1">
-        <span>Precio por noche:</span><strong>${formatPrice(room.precio)}</strong>
+        <span>Precio por noche:</span><strong>${escapeHtml(formatPrice(room.precio))}</strong>
       </div>
       <div class="d-flex justify-content-between mb-1">
-        <span>Noches (${nights}):</span><strong>${formatPrice(room.precio * nights)}</strong>
+        <span>Noches (${escapeHtml(nights)}):</span><strong>${escapeHtml(formatPrice(room.precio * nights))}</strong>
       </div>
       <hr>
       <div class="d-flex justify-content-between">
         <span><strong>Total Pagado:</strong></span>
-        <h5 class="text-gold mb-0">${formatPrice(total)}</h5>
+        <h5 class="text-gold mb-0">${escapeHtml(formatPrice(total))}</h5>
       </div>
     </div>`;
 }
 
-// =======================
-// ALERTAS
-// =======================
 function showAlert(message, type) {
   const alertDiv = document.createElement('div');
   alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3`;
   alertDiv.style.zIndex = '9999';
   alertDiv.innerHTML = `
     <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-    ${message}
+    ${escapeHtml(message)}
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
   `;
   document.body.appendChild(alertDiv);
   setTimeout(() => alertDiv.remove(), 3000);
 }
 
-// =======================
-// FILTROS DE RESERVAS
-// =======================
 function setupFilters() {
   const filters = {
     filterAll: 'all',
@@ -355,9 +308,6 @@ function setupFilters() {
   });
 }
 
-// =======================
-// ESTADO VACÍO
-// =======================
 function renderEmptyState() {
   return `
     <div class="empty-bookings text-center">
