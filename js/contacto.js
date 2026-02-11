@@ -1,3 +1,5 @@
+import { escapeHtml } from './utils.js';
+
 // Navbar con efecto scroll - igual que index.html
 const nav = document.getElementById('mainNav');
 
@@ -32,7 +34,7 @@ function showAlert(message, type = 'success') {
   alertContainer.innerHTML = `
     <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
       <i class="bi ${iconClass} me-2"></i>
-      ${message}
+      ${escapeHtml(message)}
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
   `;
