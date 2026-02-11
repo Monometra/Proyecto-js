@@ -1,4 +1,5 @@
 import { addUser, isAuthenticated, login } from './storage.js';
+import { escapeHtml } from './utils.js';
 
 if (isAuthenticated()) {
   window.location.href = 'mis-reservas.html';
@@ -11,9 +12,9 @@ const passwordStrength = document.getElementById('passwordStrength');
 
 function showAlert(message, type = 'danger') {
   alertContainer.innerHTML = `
-    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+    <div class="alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show" role="alert">
       <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-      ${message}
+      ${escapeHtml(message)}
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
   `;
