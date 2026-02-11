@@ -3,6 +3,7 @@
 // ========================================
 
 import { login, isAuthenticated, isAdmin } from './storage.js';
+import { escapeHtml } from './utils.js';
 
 // Redirigir si ya está autenticado
 if (isAuthenticated()) {
@@ -18,9 +19,9 @@ const alertContainer = document.getElementById('alertContainer');
 
 function showAlert(message, type = 'danger') {
   alertContainer.innerHTML = `
-    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+    <div class="alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show" role="alert">
       <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-      ${message}
+      ${escapeHtml(message)}
       <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
   `;
