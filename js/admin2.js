@@ -1,3 +1,5 @@
+import { escapeHtml } from './utils.js';
+
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('checkinForm');
   
@@ -32,10 +34,10 @@ document.addEventListener('DOMContentLoaded', function() {
       resultDiv.innerHTML = `
         <div class="alert alert-success">
           <h5><i class="bi bi-check-circle"></i> Check-in Exitoso</h5>
-          <p class="mb-1"><strong>Reserva:</strong> #${reservaId}</p>
-          <p class="mb-1"><strong>Cliente:</strong> ${clienteNombre}</p>
-          <p class="mb-1"><strong>Hora:</strong> ${horaLlegada}</p>
-          <p class="mb-0"><strong>Fecha:</strong> ${new Date().toLocaleDateString('es-CO')}</p>
+          <p class="mb-1"><strong>Reserva:</strong> #${escapeHtml(reservaId)}</p>
+          <p class="mb-1"><strong>Cliente:</strong> ${escapeHtml(clienteNombre)}</p>
+          <p class="mb-1"><strong>Hora:</strong> ${escapeHtml(horaLlegada)}</p>
+          <p class="mb-0"><strong>Fecha:</strong> ${escapeHtml(new Date().toLocaleDateString('es-CO'))}</p>
         </div>
       `;
       
